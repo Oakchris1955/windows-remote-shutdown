@@ -1,4 +1,6 @@
 {
 	"name": "windows-remote-shutdown",
-	"workspaces": []
+	"workspaces": [
+		"server"
+	]
 }
