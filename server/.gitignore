@@ -1,2 +1,5 @@
 # JS files (everything here is written in TypeScript)
 *.js
+
+# Authorization token
+AUTH_TOKEN
