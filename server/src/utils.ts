@@ -24,8 +24,6 @@ export async function handler(req: Request, res: Response) {
 	// slice(1) removes the trailing "/" in the beginning of the string
 	const method = req.path.slice(1) as ActionType;
 
-	console.log(req.body);
-
 	// If no authorization token detected, send 401 Unathorized
 	if (typeof req.body.auth_token !== "string") {
 		res.status(401).end();
