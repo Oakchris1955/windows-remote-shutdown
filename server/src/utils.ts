@@ -7,13 +7,16 @@ enum ActionType {
 	Reboot = "reboot"
 }
 
-function action(method: ActionType) {
+const defaultTimeout = 0;
+const defaultForceful = true;
+
+function action(method: ActionType, timeout: number, forceful: boolean) {
 	switch (method) {
 		case ActionType.Shutdown:
-			exec("shutdown -s -t 0");
+			exec(`shutdown -s ${forceful ? "-f" : ""} -t ${timeout}`);
 			break;
 		case ActionType.Reboot:
-			exec("shutdown -r -t 0");
+			exec(`shutdown -r ${forceful ? "-f" : ""} -t ${timeout}`);
 			break;
 		default:
 			throw new Error("Couldn't find specified method type.");
@@ -23,6 +26,8 @@ function action(method: ActionType) {
 export async function handler(req: Request, res: Response) {
 	// slice(1) removes the trailing "/" in the beginning of the string
 	const method = req.path.slice(1) as ActionType;
+	const timeout = +(req.body.timeout as string) || +(req.query.timeout as string) || defaultTimeout
+	const forceful = (req.body.forceful as string || req.query.forceful as string || defaultForceful.toString()) === "true";
 
 	// If no authorization token detected, send 401 Unathorized
 	if (typeof req.body.auth_token !== "string") {
@@ -36,7 +41,7 @@ export async function handler(req: Request, res: Response) {
 		if (stored_auth_token == user_auth_token) {
 			// If authorization token is valid, send 202 Accepted
 			res.status(202).end()
-			action(method)
+			action(method, timeout, forceful)
 		} else {
 			// Else, send 403 Forbidden
 			res.status(403).end()
