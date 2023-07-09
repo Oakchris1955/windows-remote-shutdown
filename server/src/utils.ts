@@ -10,17 +10,19 @@ enum ActionType {
 const defaultTimeout = 0;
 const defaultForceful = true;
 
-function action(method: ActionType, timeout: number, forceful: boolean) {
-	switch (method) {
+function actionFlag(action: ActionType): string {
+	switch (action) {
 		case ActionType.Shutdown:
-			exec(`shutdown -s ${forceful ? "-f" : ""} -t ${timeout}`);
-			break;
+			return "-s";
 		case ActionType.Reboot:
-			exec(`shutdown -r ${forceful ? "-f" : ""} -t ${timeout}`);
-			break;
+			return "-r";
 		default:
 			throw new Error("Couldn't find specified method type.");
 	}
+}
+
+function action(method: ActionType, timeout: number, forceful: boolean) {
+	exec(`shutdown ${actionFlag(method)} ${forceful ? "-f" : ""} -t ${timeout}`);
 }
 
 export async function handler(req: Request, res: Response) {
