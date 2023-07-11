@@ -118,14 +118,18 @@ export default function App() {
         async function getAuthToken() {
             if (typeof authToken !== "string") {
                 const storage_authToken = await AsyncStorage.getItem("authToken");
-                setAuthToken(storage_authToken);
+                if (storage_authToken === null) {
+                    setTokenVisible(true);
+                } else {
+                    setAuthToken(storage_authToken);
+                }
             } else if (typeof userToken === "string") {
                 AsyncStorage.setItem("authToken", userToken);
             }
         }
 
         getAuthToken()
-    }, []);
+    }, [tokenVisible]);
 
 	return (
 		<View style={styles.container}>
