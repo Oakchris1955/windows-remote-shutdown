@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { Modal, Pressable, StyleSheet, Text, TextInput, View, ViewProps } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, TextInput, View, ViewProps, Alert } from 'react-native';
 import { ComponentProps, ReactNode, useState, useEffect } from 'react';
 
 import SelectDropdown from 'react-native-select-dropdown'
@@ -55,6 +55,24 @@ const fieldStyles = StyleSheet.create({
     }
 });
 
+/// Function obtained from https://dmitripavlutin.com/timeout-fetch-request/ with minor changes
+async function fetchWithTimeout(resource: string, options: RequestInit & { timeout?: number }) {
+    const { timeout = 5000 } = options;
+    
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+  
+    const response = await fetch(resource, {
+        ...options,
+        signal: controller.signal  
+    });
+    clearTimeout(id);
+  
+    return response;
+}
+
+const remoteIP = "192.168.1.11";
+const remotePort = 8600;
 
 export default function App() {
     const [selectedMethod, setSelectedMethod] = useState(defaultMethod);
@@ -66,13 +84,44 @@ export default function App() {
     const [authToken, setAuthToken] = useState<string | null | undefined>(undefined);
     const [userToken, setUserToken] = useState<string | undefined>(undefined);
 
+    function performAction() {
+        if (typeof authToken === "string") {
+            fetchWithTimeout(`http://${remoteIP}:${remotePort}/${selectedMethod.value}`, {
+                method: "POST",
+                timeout: 1000,
+                headers: {
+                    "Content-Type": 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    "auth_token": authToken,
+                    "timeout": timeout.toString(),
+                    "forceful": new Boolean(forcefulShutdown).toString()
+                }).toString()
+            }).then((response) => {
+                switch (response.status) {
+                    case 401:
+                    case 403:
+                        Alert.alert("Μη έγκυρο πιστοποιητικό", "Είτε το πιστοποιητικό σύνδεσης σας είναι μη έγκυρο ή δεν έχετε εισάγει ένα");
+                        break;
+                    case 202:
+                        Alert.alert("Επιτυχία", `Η εκτέλεση της ενέργειας σας (${selectedMethod.label}) θα αρχίσει σύντομα`);
+                        break;
+                    default:
+                        Alert.alert("Κρίσιμο σφάλμα", "Αν διαβάζετε αυτό το μήνυμα, επικοινωνήστε με το δημιουργό της εφαρμογής");
+                }
+            }).catch((_error) => {
+                Alert.alert("Σφάλμα", "Σφάλμα σύνδεσης. Ελέγξτε την σύνδεση σας")
+            })
+        }
+    }
+
     useEffect(() => {
         async function getAuthToken() {
             if (typeof authToken !== "string") {
                 const storage_authToken = await AsyncStorage.getItem("authToken");
                 setAuthToken(storage_authToken);
-            } else {
-                AsyncStorage.setItem("authToken", authToken);
+            } else if (typeof userToken === "string") {
+                AsyncStorage.setItem("authToken", userToken);
             }
         }
 
@@ -91,7 +140,7 @@ export default function App() {
                     onSelect={(itemValue: DisplayedMethod, _itemIndex) => setSelectedMethod(itemValue)}
                 />
             </Field>
-            <Pressable style={{backgroundColor: "#e7e7e7", paddingVertical: "2%", paddingHorizontal: "4%", margin: "3%"}}>
+            <Pressable style={{backgroundColor: "#e7e7e7", paddingVertical: "2%", paddingHorizontal: "4%", margin: "3%"}} onPress={performAction}>
                 <Text style={{fontSize: 14}}>Εκτέλεση ενέργειας</Text>
             </Pressable>
             <Pressable style={{backgroundColor: "#eee", paddingVertical: "2%", paddingHorizontal: "4%", margin: "1%"}} onPress={() => setOptionsVisibility(true)}>
@@ -143,7 +192,7 @@ export default function App() {
             </Modal>
             <Modal visible={authToken === null || tokenVisible}>
                 <View style={{justifyContent: "center", alignItems: "center", width: "100%", height: "100%"}}>
-                    <TextInput textAlign='center' placeholder='Εισάγετε το πιστοποιητικό εξουσιοδότησης' defaultValue={userToken} style={{backgroundColor: "#ddd", width: "90%", margin: "2%"}} onChangeText={setUserToken}/>
+                    <TextInput textAlign='center' placeholder='Εισάγετε το πιστοποιητικό εξουσιοδότησης' defaultValue={authToken || undefined} style={{backgroundColor: "#ddd", width: "90%", margin: "2%"}} onChangeText={setUserToken}/>
                     <Pressable style={{backgroundColor: "#eee", padding: "1%"}} onPress={() => {
                         if (typeof userToken === "string") {
                             setAuthToken(userToken);
