@@ -1,0 +1,19 @@
+{
+    "cli": {
+        "version": "^3.15.1",
+        "requireCommit": true
+    },
+    "build": {
+        "development": {
+            "ios": {
+                "simulator": true
+            }
+        },
+        "production": {},
+        "production-apk": {
+            "android": {
+                "buildType": "apk"
+            }
+        }
+    }
+}
