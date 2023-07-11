@@ -29,8 +29,7 @@ function stringifyBool(bool: boolean) {
 
 
 interface FieldProps extends ViewProps {
-    label: string,
-    children: ReactNode
+    label: string
 }
 
 function Field({ label, children, style }: FieldProps) {
