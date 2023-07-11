@@ -139,26 +139,26 @@ export default function App() {
                     onSelect={(itemValue: DisplayedMethod, _itemIndex) => setSelectedMethod(itemValue)}
                 />
             </Field>
-            <Pressable style={{backgroundColor: "#e7e7e7", paddingVertical: "2%", paddingHorizontal: "4%", margin: "3%"}} onPress={performAction}>
+            <Pressable style={styles.executeButton} onPress={performAction}>
                 <Text style={{fontSize: 14}}>Εκτέλεση ενέργειας</Text>
             </Pressable>
-            <Pressable style={{backgroundColor: "#eee", paddingVertical: "2%", paddingHorizontal: "4%", margin: "1%"}} onPress={() => setOptionsVisibility(true)}>
+            <Pressable style={styles.optionsButton} onPress={() => setOptionsVisibility(true)}>
                 <Text style={{fontSize: 10}}>Περισσότερες επιλογές</Text>
             </Pressable>
             <Modal visible={optionsVisible}>
-                <View style={{width: "100%", flexDirection: "row", justifyContent: "space-between"}}>
+                <View style={styles.optionsModal}>
                     <Pressable
-                        style={{backgroundColor: "#eee", paddingVertical: "2%", paddingHorizontal: "4%", width: "30%"}}
+                        style={[styles.button, {width: "30%"}]}
                         onPress={() => setOptionsVisibility(false)}>
-                        <Text style={{width: "100%", flexGrow: 1, textAlign: "center", verticalAlign: "middle"}}>Επιστροφή</Text>
+                        <Text style={styles.buttonText}>Επιστροφή</Text>
                     </Pressable>
                     <Pressable
-                        style={{backgroundColor: "#eee", paddingVertical: "2%", paddingHorizontal: "4%", width: "50%"}}
+                        style={[styles.button, {width: "50%"}]}
                         onPress={() => setTokenVisible(true)}>
-                        <Text style={{width: "100%", flexGrow: 1, textAlign: "center", verticalAlign: "middle"}}>Ορισμός πιστοποιητικού εξουσιοδότησης</Text>
+                        <Text style={styles.buttonText}>Ορισμός πιστοποιητικού εξουσιοδότησης</Text>
                     </Pressable>
                 </View>
-                <View style={{justifyContent: "center", alignItems: "center", width: "100%", height: "100%"}}>
+                <View style={styles.modalView}>
                     <View style={{backgroundColor: "#fff", padding: "1%", alignItems: "center", width: "100%"}}>
                         <Field label='Εκτέλεση ενέργειας σε ... δεύτερα:' style={styles.genericField}>
                             <TextInput
@@ -190,7 +190,7 @@ export default function App() {
                 </View>
             </Modal>
             <Modal visible={authToken === null || tokenVisible}>
-                <View style={{justifyContent: "center", alignItems: "center", width: "100%", height: "100%"}}>
+                <View style={styles.modalView}>
                     <TextInput textAlign='center' placeholder='Εισάγετε το πιστοποιητικό εξουσιοδότησης' defaultValue={authToken || undefined} style={{backgroundColor: "#ddd", width: "90%", margin: "2%"}} onChangeText={setUserToken}/>
                     <Pressable style={{backgroundColor: "#eee", padding: "1%"}} onPress={() => {
                         if (typeof userToken === "string") {
@@ -226,5 +226,45 @@ const styles = StyleSheet.create({
     picker: {
         backgroundColor: "#ddd",
         width: "100%"
+    },
+
+    executeButton: {
+        backgroundColor: "#e7e7e7",
+        paddingVertical: "2%",
+        paddingHorizontal: "4%",
+        margin: "3%"
+    },
+
+    optionsButton: {
+        backgroundColor: "#eee",
+        paddingVertical: "2%",
+        paddingHorizontal: "4%",
+        margin: "1%"
+    },
+
+    optionsModal: {
+        width: "100%",
+        flexDirection: "row",
+        justifyContent: "space-between"
+    },
+
+    modalView: {
+        justifyContent: "center",
+        alignItems: "center",
+        width: "100%",
+        height: "100%"
+    },
+
+    button: {
+        backgroundColor: "#eee",
+        paddingVertical: "2%",
+        paddingHorizontal: "4%"
+    },
+
+    buttonText: {
+        width: "100%",
+        flexGrow: 1,
+        textAlign: "center",
+        verticalAlign: "middle"
     },
 });
