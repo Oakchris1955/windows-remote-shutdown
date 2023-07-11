@@ -145,7 +145,7 @@ export default function App() {
             <Pressable style={styles.optionsButton} onPress={() => setOptionsVisibility(true)}>
                 <Text style={{fontSize: 10}}>Περισσότερες επιλογές</Text>
             </Pressable>
-            <Modal visible={optionsVisible}>
+            <Modal visible={optionsVisible} onRequestClose={() => setOptionsVisibility(false)}>
                 <View style={styles.optionsModal}>
                     <Pressable
                         style={[styles.button, {width: "30%"}]}
@@ -189,9 +189,11 @@ export default function App() {
                     </View>
                 </View>
             </Modal>
-            <Modal visible={authToken === null || tokenVisible}>
+            <Modal visible={authToken === null || tokenVisible} onRequestClose={() => setTokenVisible(false)}>
                 <View style={styles.modalView}>
-                    <TextInput textAlign='center' placeholder='Εισάγετε το πιστοποιητικό εξουσιοδότησης' defaultValue={authToken || undefined} style={{backgroundColor: "#ddd", width: "90%", margin: "2%"}} onChangeText={setUserToken}/>
+                    <Field label='Πιστοποιητικό εξουσιοδότησης:' style={{alignItems: "center"}}>
+                        <TextInput textAlign='center' placeholder='Εισάγετε το πιστοποιητικό εξουσιοδότησης' defaultValue={authToken || undefined} style={{backgroundColor: "#ddd", width: "90%", margin: "2%"}} onChangeText={setUserToken}/>
+                    </Field>
                     <Pressable style={{backgroundColor: "#eee", padding: "1%"}} onPress={() => {
                         if (typeof userToken === "string") {
                             setAuthToken(userToken);
