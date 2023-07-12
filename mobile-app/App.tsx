@@ -82,6 +82,7 @@ export default function App() {
 
     const [authToken, setAuthToken] = useState<string | null | undefined>(undefined);
     const [userToken, setUserToken] = useState<string | undefined>(undefined);
+    const [showToken, setShowToken] = useState(false);
 
     function performAction() {
         if (typeof authToken === "string") {
@@ -123,7 +124,7 @@ export default function App() {
                 } else {
                     setAuthToken(storage_authToken);
                 }
-            } else if (typeof userToken === "string") {
+            } else if (typeof userToken === "string" && userToken.length !== 0) {
                 AsyncStorage.setItem("authToken", userToken);
             }
         }
@@ -193,16 +194,25 @@ export default function App() {
                     </View>
                 </View>
             </Modal>
-            <Modal visible={authToken === null || tokenVisible} onRequestClose={() => setTokenVisible(false)}>
+            <Modal visible={authToken === null || tokenVisible} onRequestClose={() => {if (typeof authToken === "string") {setTokenVisible(false); setShowToken(false)}}}>
                 <View style={styles.modalView}>
-                    <Field label='Πιστοποιητικό εξουσιοδότησης:' style={{alignItems: "center"}}>
-                        <TextInput textAlign='center' placeholder='Εισάγετε το πιστοποιητικό εξουσιοδότησης' defaultValue={authToken || undefined} style={{backgroundColor: "#ddd", width: "90%", margin: "2%"}} onChangeText={setUserToken}/>
+                    <Field label={!showToken ? "Πατήστε το κουμπί για να δείτε το πιστοποιητικό εξουσιοδότησής σας:" : "Παρόν πιστοποιητικό εξουσιοδότησης:"} style={{alignItems: "center"}}>
+                        {showToken ?
+                            <Text>{authToken}</Text> :
+                            <Pressable style={styles.button} onPress={() => setShowToken(true)}>
+                                <Text>Προβολή πιστοποιητικού</Text>
+                            </Pressable>
+                        }
+                    </Field>
+                    <Field label='Νέο πιστοποιητικό εξουσιοδότησης:' style={{alignItems: "center"}}>
+                        <TextInput textAlign='center' placeholder='Εισάγετε το πιστοποιητικό εξουσιοδότησης' style={{backgroundColor: "#ddd", width: "90%", margin: "2%"}} onChangeText={setUserToken}/>
                     </Field>
                     <Pressable style={{backgroundColor: "#eee", padding: "1%"}} onPress={() => {
-                        if (typeof userToken === "string") {
+                        if (typeof userToken === "string" && userToken.length !== 0) {
                             setAuthToken(userToken);
                             setOptionsVisibility(false);
                             setTokenVisible(false);
+                            setShowToken(false);
                         }
                     }}>
                         <Text>Υποβολή πιστοποιητικού</Text>
