@@ -1,6 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { Modal, Pressable, StyleSheet, Text, TextInput, View, ViewProps, Alert } from 'react-native';
 import { ReactNode, useState, useEffect } from 'react';
+import ipRegex from 'ip-regex';
 
 import SelectDropdown from 'react-native-select-dropdown'
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -70,8 +71,8 @@ async function fetchWithTimeout(resource: string, options: RequestInit & { timeo
     return response;
 }
 
-const remoteIP = "192.168.1.11";
-const remotePort = 8600;
+const defaultRemoteIP = "192.168.1.11";
+const defaultRemotePort = 8600;
 
 export default function App() {
     const [selectedMethod, setSelectedMethod] = useState(defaultMethod);
@@ -83,6 +84,12 @@ export default function App() {
     const [authToken, setAuthToken] = useState<string | null | undefined>(undefined);
     const [userToken, setUserToken] = useState<string | undefined>(undefined);
     const [showToken, setShowToken] = useState(false);
+
+    const [remoteIP, setRemoteIP] = useState(defaultRemoteIP);
+    const [remotePort, setRemotePort] = useState(defaultRemotePort);
+
+    const [userIP, setUserIP] = useState(remoteIP);
+    const [userPort, setUserPort] = useState(remotePort);
 
     function performAction() {
         if (typeof authToken === "string") {
@@ -165,6 +172,43 @@ export default function App() {
                 </View>
                 <View style={styles.modalView}>
                     <View style={{backgroundColor: "#fff", padding: "1%", alignItems: "center", width: "100%"}}>
+                        <Field label='Διεύθυνση IP:' style={styles.genericField}>
+                            <View style={{flexDirection: "row", width: "100%"}}>
+                            <Text style={{verticalAlign: "middle"}}>http://</Text>
+                                <TextInput
+                                    style={{alignItems: "stretch", backgroundColor: "#ddd", padding: 0, width: "55%"}}
+                                    value={userIP}
+                                    onChangeText={setUserIP}
+                                    onSubmitEditing={() => {
+                                        if (ipRegex({exact: true}).test(userIP)) {
+                                            setRemoteIP(userIP)
+                                        } else {
+                                            // If IP isn't valid, revert input value back to original
+                                            setUserIP(remoteIP)
+                                            // Also, alert the user
+                                            Alert.alert("Μη έγκυρη διεύθυνση IP", "Η διεύθυνση IP που εισαγάγατε δεν είναι έγκυρη")
+                                        }
+                                    }}
+                                />
+                                <Text style={{verticalAlign: "middle", paddingHorizontal: 1}}>:</Text>
+                                <TextInput
+                                    style={{alignItems: "stretch", backgroundColor: "#ddd", padding: 0, width: "15%"}}
+                                    defaultValue={remotePort.toString()}
+                                    inputMode='numeric'
+                                    onChangeText={(text) => setUserPort(+text)}
+                                    onSubmitEditing={() => {
+                                        if (!isNaN(userPort) && userPort > 0 && userPort < 2**16) {
+                                            setRemotePort(userPort)
+                                        } else {
+                                            // If port number isn't valid, revert input value back to original
+                                            setUserPort(remotePort)
+                                            // Also, alert the user
+                                            Alert.alert("Μη έγκυρος αριθμός θύρας", "Ο αριθμός θύρας που εισαγάγατε δεν είναι έγκυρος")
+                                        }
+                                    }}
+                                />
+                            </View>
+                        </Field>
                         <Field label='Εκτέλεση ενέργειας σε ... δεύτερα:' style={styles.genericField}>
                             <TextInput
                                 style={{alignItems: "stretch", backgroundColor: "#ddd", padding: 0}}
