@@ -123,7 +123,7 @@ export default function App() {
     }
 
     useEffect(() => {
-        async function getAuthToken() {
+        async function processAuthToken() {
             if (typeof authToken !== "string") {
                 const storage_authToken = await AsyncStorage.getItem("authToken");
                 if (storage_authToken === null) {
@@ -136,8 +136,43 @@ export default function App() {
             }
         }
 
-        getAuthToken()
-    }, [tokenVisible]);
+        async function processRemoteIP() {
+            if (remoteIP === defaultRemoteIP) {
+                const storage_remoteIP = await AsyncStorage.getItem("remoteIP")
+                if (typeof storage_remoteIP === "string") {
+                    if (ipRegex({exact: true}).test(storage_remoteIP)) {
+                        setRemoteIP(storage_remoteIP)
+                        setUserIP(storage_remoteIP)
+                    } else {
+                        AsyncStorage.removeItem("remoteIP")
+                    }
+                }
+            } else {
+                AsyncStorage.setItem("remoteIP", remoteIP);
+            }
+        }
+
+        async function processRemotePort() {
+            if (remotePort === defaultRemotePort) {
+                const storage_remotePort = await AsyncStorage.getItem("remotePort")
+                if (typeof storage_remotePort === "string") {
+                    const storage_remotePort_number = +storage_remotePort;
+                    if (!isNaN(storage_remotePort_number)) {
+                        setRemotePort(storage_remotePort_number)
+                        setUserPort(storage_remotePort_number)
+                    } else {
+                        AsyncStorage.removeItem("remotePort")
+                    }
+                }
+            } else {
+                AsyncStorage.setItem("remotePort", remotePort.toString());
+            }
+        }
+
+        processAuthToken()
+        processRemoteIP()
+        processRemotePort()
+    }, [optionsVisible, tokenVisible, authToken, remoteIP, remotePort]);
 
 	return (
 		<View style={styles.container}>
@@ -193,7 +228,7 @@ export default function App() {
                                 <Text style={{verticalAlign: "middle", paddingHorizontal: 1}}>:</Text>
                                 <TextInput
                                     style={{alignItems: "stretch", backgroundColor: "#ddd", padding: 0, width: "15%"}}
-                                    defaultValue={remotePort.toString()}
+                                    value={userPort.toString()}
                                     inputMode='numeric'
                                     onChangeText={(text) => setUserPort(+text)}
                                     onSubmitEditing={() => {
