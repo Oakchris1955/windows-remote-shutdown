@@ -1,13 +1,7 @@
-# Sync with origin
+REM Sync with origin
 git fetch
 git reset origin/main
 git checkout .
 
-# Install production dependencies
-npm install --omit=dev
-
-# Build JS files
-npm run build
-
-# Start server
-npm start
+REM Install production dependencies, build JS files and start server
+npm install --omit=dev & npm run build & npm start
