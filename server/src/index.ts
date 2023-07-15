@@ -1,6 +1,6 @@
 import express from 'express';
 import "dotenv/config";
-import { handler } from './utils';
+import { abortHandler, actionHandler, authenticator } from './utils';
 
 if (typeof process.env.port === "undefined") {
 	throw new Error("PORT is missing in the .env file");
@@ -15,8 +15,9 @@ const app = express();
 
 app.use(express.urlencoded({extended: true}));
 
-app.post('/shutdown', handler);
-app.post('/reboot', handler);
+app.post('/shutdown', authenticator(actionHandler));
+app.post('/reboot', authenticator(actionHandler));
+app.post('/abort', authenticator(abortHandler));
 
 app.listen(port, () => {
 	console.log(`Listening for requests on port: ${port}`)
