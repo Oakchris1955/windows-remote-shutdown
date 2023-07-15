@@ -85,8 +85,8 @@ export default function App() {
     const [userToken, setUserToken] = useState<string | undefined>(undefined);
     const [showToken, setShowToken] = useState(false);
 
-    const [remoteIP, setRemoteIP] = useState(defaultRemoteIP);
-    const [remotePort, setRemotePort] = useState(defaultRemotePort);
+    const [remoteIP, setRemoteIP] = useState<string | undefined>(undefined);
+    const [remotePort, setRemotePort] = useState<number | undefined>(undefined);
 
     const [userIP, setUserIP] = useState(remoteIP);
     const [userPort, setUserPort] = useState(remotePort);
@@ -137,7 +137,7 @@ export default function App() {
         }
 
         async function processRemoteIP() {
-            if (remoteIP === defaultRemoteIP) {
+            if (typeof remoteIP === "undefined") {
                 const storage_remoteIP = await AsyncStorage.getItem("remoteIP")
                 if (typeof storage_remoteIP === "string") {
                     if (ipRegex({exact: true}).test(storage_remoteIP)) {
@@ -153,7 +153,7 @@ export default function App() {
         }
 
         async function processRemotePort() {
-            if (remotePort === defaultRemotePort) {
+            if (typeof remotePort === "undefined") {
                 const storage_remotePort = await AsyncStorage.getItem("remotePort")
                 if (typeof storage_remotePort === "string") {
                     const storage_remotePort_number = +storage_remotePort;
@@ -215,7 +215,7 @@ export default function App() {
                                     value={userIP}
                                     onChangeText={setUserIP}
                                     onSubmitEditing={() => {
-                                        if (ipRegex({exact: true}).test(userIP)) {
+                                        if (ipRegex({exact: true}).test(userIP || defaultRemoteIP)) {
                                             setRemoteIP(userIP)
                                         } else {
                                             // If IP isn't valid, revert input value back to original
@@ -228,11 +228,11 @@ export default function App() {
                                 <Text style={{verticalAlign: "middle", paddingHorizontal: 1}}>:</Text>
                                 <TextInput
                                     style={{alignItems: "stretch", backgroundColor: "#ddd", padding: 0, width: "15%"}}
-                                    value={userPort.toString()}
+                                    value={userPort?.toString()}
                                     inputMode='numeric'
                                     onChangeText={(text) => setUserPort(+text)}
                                     onSubmitEditing={() => {
-                                        if (!isNaN(userPort) && userPort > 0 && userPort < 2**16) {
+                                        if (!isNaN(userPort || defaultRemotePort) && userPort || defaultRemotePort > 0 && userPort || defaultRemotePort < 2**16) {
                                             setRemotePort(userPort)
                                         } else {
                                             // If port number isn't valid, revert input value back to original
