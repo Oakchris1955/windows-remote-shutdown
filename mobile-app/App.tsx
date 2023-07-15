@@ -6,23 +6,25 @@ import ipRegex from 'ip-regex';
 import SelectDropdown from 'react-native-select-dropdown'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-interface DisplayedMethod {
-    label: string,
-    value: string
+enum Method {
+    Shutdown = "shutdown",
+    Reboot = "reboot",
+    Abort = "abort"
 }
 
-const methods: DisplayedMethod[] = [
-    {
-        label: "Τερματισμός λειτουργίας",
-        value: "shutdown"
-    },
-    {
-        label: "Επανεκκίνηση",
-        value: "reboot"
-    }
-];
+type DisplayedMethods = {
+    [key in Method]: string;
+};
 
-const defaultMethod = methods.find((method) => method.value === "shutdown") as DisplayedMethod;
+type DisplayedMethodAsList = [Method, string];
+
+const methods: DisplayedMethods = {
+    [Method.Shutdown]: "Τερματισμός λειτουργίας",
+    [Method.Reboot]: "Επανεκκίνηση",
+    [Method.Abort]: "Ακύρωση ενέργειας"
+};
+
+const defaultMethod = Method.Shutdown
 
 function stringifyBool(bool: boolean) {
     return bool ? "Ναι" : "Όχι"
@@ -93,7 +95,7 @@ export default function App() {
 
     function performAction() {
         if (typeof authToken === "string") {
-            fetchWithTimeout(`http://${remoteIP}:${remotePort}/${selectedMethod.value}`, {
+            fetchWithTimeout(`http://${remoteIP}:${remotePort}/${selectedMethod}`, {
                 method: "POST",
                 timeout: 1000,
                 headers: {
@@ -101,8 +103,10 @@ export default function App() {
                 },
                 body: new URLSearchParams({
                     "auth_token": authToken,
-                    "timeout": timeout.toString(),
-                    "forceful": new Boolean(forcefulShutdown).toString()
+                    ...( selectedMethod !== Method.Abort ? {
+                        "timeout": timeout.toString(),
+                        "forceful": new Boolean(forcefulShutdown).toString()
+                    } : {})
                 }).toString()
             }).then((response) => {
                 switch (response.status) {
@@ -111,7 +115,7 @@ export default function App() {
                         Alert.alert("Μη έγκυρο πιστοποιητικό", "Είτε το πιστοποιητικό σύνδεσης σας είναι μη έγκυρο ή δεν έχετε εισάγει ένα");
                         break;
                     case 202:
-                        Alert.alert("Επιτυχία", `Η εκτέλεση της ενέργειας σας (${selectedMethod.label}) θα αρχίσει σύντομα`);
+                        Alert.alert("Επιτυχία", `Η εκτέλεση της ενέργειας σας (${methods[selectedMethod]}) θα αρχίσει σύντομα`);
                         break;
                     default:
                         Alert.alert("Κρίσιμο σφάλμα", "Αν διαβάζετε αυτό το μήνυμα, επικοινωνήστε με το δημιουργό της εφαρμογής");
@@ -179,11 +183,11 @@ export default function App() {
             <Field label='Μέθοδος:' style={styles.genericField}>
                 <SelectDropdown
                     buttonStyle={styles.picker}
-                    defaultValue={selectedMethod}
-                    data={methods}
-                    buttonTextAfterSelection={(selection: DisplayedMethod) => selection.label}
-                    rowTextForSelection={(method: DisplayedMethod) => method.label}
-                    onSelect={(itemValue: DisplayedMethod, _itemIndex) => setSelectedMethod(itemValue)}
+                    defaultValue={methods[selectedMethod]}
+                    data={Object.entries(methods)}
+                    buttonTextAfterSelection={(selection: DisplayedMethodAsList) => selection[1]}
+                    rowTextForSelection={(method: DisplayedMethodAsList) => method[1]}
+                    onSelect={(itemValue: DisplayedMethodAsList, _itemIndex) => setSelectedMethod(itemValue[0])}
                 />
             </Field>
             <Pressable style={styles.executeButton} onPress={performAction}>
