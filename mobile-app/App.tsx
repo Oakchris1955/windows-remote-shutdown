@@ -90,8 +90,8 @@ export default function App() {
     const [remoteIP, setRemoteIP] = useState<string | undefined>(undefined);
     const [remotePort, setRemotePort] = useState<number | undefined>(undefined);
 
-    const [userIP, setUserIP] = useState(remoteIP);
-    const [userPort, setUserPort] = useState(remotePort);
+    const [userIP, setUserIP] = useState<string | undefined>(defaultRemoteIP);
+    const [userPort, setUserPort] = useState<number | undefined>(defaultRemotePort);
 
     function performAction() {
         if (typeof authToken === "string") {
@@ -183,7 +183,7 @@ export default function App() {
             <Field label='Μέθοδος:' style={styles.genericField}>
                 <SelectDropdown
                     buttonStyle={styles.picker}
-                    defaultValue={methods[selectedMethod]}
+                    defaultValue={[selectedMethod, methods[selectedMethod]]}
                     data={Object.entries(methods)}
                     buttonTextAfterSelection={(selection: DisplayedMethodAsList) => selection[1]}
                     rowTextForSelection={(method: DisplayedMethodAsList) => method[1]}
