@@ -78,13 +78,14 @@ const defaultRemotePort = 8600;
 
 export default function App() {
     const [selectedMethod, setSelectedMethod] = useState(defaultMethod);
-    const [optionsVisible, setOptionsVisibility] = useState(false);
-    const [tokenVisible, setTokenVisible] = useState(false);
     const [timeout, setTimeout] = useState(0);
     const [forcefulShutdown, setForcefulShutdown] = useState(true);
 
     const [authToken, setAuthToken] = useState<string | null | undefined>(undefined);
     const [userToken, setUserToken] = useState<string | undefined>(undefined);
+
+    const [optionsModalVisible, setOptionsModalVisibility] = useState(false);
+    const [tokenModalVisible, setTokenModalVisible] = useState(false);
     const [showToken, setShowToken] = useState(false);
 
     const [remoteIP, setRemoteIP] = useState<string | undefined>(undefined);
@@ -131,7 +132,7 @@ export default function App() {
             if (typeof authToken !== "string") {
                 const storage_authToken = await AsyncStorage.getItem("authToken");
                 if (storage_authToken === null) {
-                    setTokenVisible(true);
+                    setTokenModalVisible(true);
                 } else {
                     setAuthToken(storage_authToken);
                 }
@@ -176,7 +177,7 @@ export default function App() {
         processAuthToken()
         processRemoteIP()
         processRemotePort()
-    }, [optionsVisible, tokenVisible, authToken, remoteIP, remotePort]);
+    }, [optionsModalVisible, tokenModalVisible, authToken, remoteIP, remotePort]);
 
 	return (
 		<View style={styles.container}>
@@ -193,19 +194,19 @@ export default function App() {
             <Pressable style={styles.executeButton} onPress={performAction}>
                 <Text style={{fontSize: 14}}>Εκτέλεση ενέργειας</Text>
             </Pressable>
-            <Pressable style={styles.optionsButton} onPress={() => setOptionsVisibility(true)}>
+            <Pressable style={styles.optionsButton} onPress={() => setOptionsModalVisibility(true)}>
                 <Text style={{fontSize: 10}}>Περισσότερες επιλογές</Text>
             </Pressable>
-            <Modal visible={optionsVisible} onRequestClose={() => setOptionsVisibility(false)}>
+            <Modal visible={optionsModalVisible} onRequestClose={() => setOptionsModalVisibility(false)}>
                 <View style={styles.optionsModal}>
                     <Pressable
                         style={[styles.button, {width: "30%"}]}
-                        onPress={() => setOptionsVisibility(false)}>
+                        onPress={() => setOptionsModalVisibility(false)}>
                         <Text style={styles.buttonText}>Επιστροφή</Text>
                     </Pressable>
                     <Pressable
                         style={[styles.button, {width: "50%"}]}
-                        onPress={() => setTokenVisible(true)}>
+                        onPress={() => setTokenModalVisible(true)}>
                         <Text style={styles.buttonText}>Ορισμός πιστοποιητικού εξουσιοδότησης</Text>
                     </Pressable>
                 </View>
@@ -277,7 +278,7 @@ export default function App() {
                     </View>
                 </View>
             </Modal>
-            <Modal visible={authToken === null || tokenVisible} onRequestClose={() => {if (typeof authToken === "string") {setTokenVisible(false); setShowToken(false)}}}>
+            <Modal visible={authToken === null || tokenModalVisible} onRequestClose={() => {if (typeof authToken === "string") {setTokenModalVisible(false); setShowToken(false)}}}>
                 <View style={styles.modalView}>
                     <Field label={!showToken ? "Πατήστε το κουμπί για να δείτε το πιστοποιητικό εξουσιοδότησής σας:" : "Παρόν πιστοποιητικό εξουσιοδότησης:"} style={{alignItems: "center", display: authToken === null ? "none" : "flex"}}>
                         {showToken ?
@@ -293,8 +294,8 @@ export default function App() {
                     <Pressable style={{backgroundColor: "#eee", padding: "1%"}} onPress={() => {
                         if (typeof userToken === "string" && userToken.length !== 0) {
                             setAuthToken(userToken);
-                            setOptionsVisibility(false);
-                            setTokenVisible(false);
+                            setOptionsModalVisibility(false);
+                            setTokenModalVisible(false);
                             setShowToken(false);
                         }
                     }}>
