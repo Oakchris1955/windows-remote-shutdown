@@ -95,7 +95,7 @@ export default function App() {
 
     function performAction() {
         if (typeof authToken === "string") {
-            fetchWithTimeout(`http://${remoteIP}:${remotePort}/${selectedMethod}`, {
+            fetchWithTimeout(`http://${remoteIP || defaultRemoteIP}:${remotePort || defaultRemotePort}/${selectedMethod}`, {
                 method: "POST",
                 timeout: 1000,
                 headers: {
@@ -279,7 +279,7 @@ export default function App() {
             </Modal>
             <Modal visible={authToken === null || tokenVisible} onRequestClose={() => {if (typeof authToken === "string") {setTokenVisible(false); setShowToken(false)}}}>
                 <View style={styles.modalView}>
-                    <Field label={!showToken ? "Πατήστε το κουμπί για να δείτε το πιστοποιητικό εξουσιοδότησής σας:" : "Παρόν πιστοποιητικό εξουσιοδότησης:"} style={{alignItems: "center"}}>
+                    <Field label={!showToken ? "Πατήστε το κουμπί για να δείτε το πιστοποιητικό εξουσιοδότησής σας:" : "Παρόν πιστοποιητικό εξουσιοδότησης:"} style={{alignItems: "center", display: authToken === null ? "none" : "flex"}}>
                         {showToken ?
                             <Text>{authToken}</Text> :
                             <Pressable style={styles.button} onPress={() => setShowToken(true)}>
